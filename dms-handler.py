@@ -20,7 +20,7 @@ def handler(event, context):
     lamb: Client = boto3.client('lambda')
     resp = []
     for record in event["Records"]:
-        message = record["Sns"]["Message"]
+        message = json.loads(record["Sns"]["Message"])
         task_name = message["SourceId"]
         event_message = message["Event Message"]
 
