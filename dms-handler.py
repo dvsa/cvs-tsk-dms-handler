@@ -16,25 +16,29 @@ boto3.set_stream_logger('', logging.INFO)
 
 @xray_recorder.capture('invoke')
 def handler(event, context):
+    logging.info(repr(event))
     lamb: Client = boto3.client('lambda')
-    message = event["Message"]
-    task_name = message["SourceId"]
-    event_message = message["Event Message"]
+    resp = []
+    for record in event["Records"]:
+        message = record["Sns"]["Message"]
+        task_name = message["SourceId"]
+        event_message = message["Event Message"]
 
-    current_time = f"{datetime.datetime.utcnow().isoformat(timespec='minutes')}Z"
-    payload = {
-        "message_type": "teams",
-        "web_hook_url": os.getenv('TEAMS_URL'),
-        "subject": f"DMS Task: {task_name} failed",
-        "body": f"Event messaged received: {event_message} at {current_time}"
-    }
+        current_time = f"{datetime.datetime.utcnow().isoformat(timespec='minutes')}Z"
+        payload = {
+            "message_type": "teams",
+            "web_hook_url": os.getenv('TEAMS_URL'),
+            "subject": f"DMS Task: {task_name} failed",
+            "body": f"Event message received: {event_message} at {current_time}"
+        }
 
-    lambda_name = os.getenv('NOTIFY_LAMBDA_NAME')
-    resp = lamb.invoke(FunctionName=lambda_name, Payload=json.dumps(payload))
-    if resp.get('FunctionError') is not None:
-        raise RuntimeError(f'{lambda_name} failed to notify with {payload}')
-    else:
-        return resp['Payload'].read()
+        lambda_name = os.getenv('NOTIFY_LAMBDA_NAME')
+        res = lamb.invoke(FunctionName=lambda_name, Payload=json.dumps(payload))
+        if res.get('FunctionError') is not None:
+            raise RuntimeError(f'{lambda_name} failed to notify with {payload}')
+        else:
+            resp.append(res)
+    return resp
 
 
 if __name__ == '__main__':
