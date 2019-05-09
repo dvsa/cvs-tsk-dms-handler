@@ -21,6 +21,7 @@ def handler(event, context):
     resp = []
     for record in event["Records"]:
         message = json.loads(record["Sns"]["Message"])
+        print(message)
         task_name = message["SourceId"]
         event_message = message["Event Message"]
 
