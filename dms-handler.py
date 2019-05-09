@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 import base64
 import boto3
@@ -21,8 +22,9 @@ def handler(event, context):
     resp = []
     for record in event["Records"]:
         message = json.loads(record["Sns"]["Message"])
-        print(message)
-        task_name = message["SourceId"]
+        identifier_link = message["Identifier Link"]
+        task_name = re.search(r"(?<=SourceId:).*$", identifier_link).strip()
+        print(task_name)
         event_message = message["Event Message"]
 
         current_time = f"{datetime.datetime.utcnow().isoformat(timespec='minutes')}Z"
