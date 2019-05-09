@@ -30,7 +30,7 @@ def handler(event, context):
         payload = {
             "message_type": "teams",
             "web_hook_url": os.getenv('TEAMS_URL'),
-            "subject": f"DMS Task: {task_name} failed",
+            "subject": f"DMS Task: {task_name} status change",
             "body": f"Event message received: {event_message} at {current_time}"
         }
 
