@@ -24,7 +24,6 @@ def handler(event, context):
         message = json.loads(record["Sns"]["Message"])
         identifier_link = message["Identifier Link"]
         task_name = re.search(r"(?<=SourceId:).*$", identifier_link).group(0)
-        print(task_name)
         event_message = message["Event Message"]
 
         current_time = f"{datetime.datetime.utcnow().isoformat(timespec='minutes')}Z"
@@ -40,7 +39,7 @@ def handler(event, context):
         if res.get('FunctionError') is not None:
             raise RuntimeError(f'{lambda_name} failed to notify with {payload}')
         else:
-            resp.append(res)
+            resp.append(res["Payload"].read())
     return resp
 
 
