@@ -23,7 +23,7 @@ def handler(event, context):
     for record in event["Records"]:
         message = json.loads(record["Sns"]["Message"])
         identifier_link = message["Identifier Link"]
-        task_name = re.search(r"(?<=SourceId:).*$", identifier_link)
+        task_name = re.search(r"(?<=SourceId:).*$", identifier_link).group(0)
         print(task_name)
         event_message = message["Event Message"]
 
